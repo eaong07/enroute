@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" >
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+        <link rel="stylesheet"  href="static/main.css">
+        <link href="https://fonts.googleapis.com/icon?family=Rubik" type="text/css" rel="stylesheet">
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script src="https://apis.google.com/js/platform.js" async defer></script>  
+        <script type="text/javascript">
+        function onSignIn(googleUser) {
+                    var profile = googleUser.getBasicProfile();
+                    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+                    console.log('Name: ' + profile.getName());
+                    console.log('Image URL: ' + profile.getImageUrl());
+                    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+                }
+        </script>    
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v9.0&appId=1241555646201743&autoLogAppEvents=1" nonce="Bj6C5koI"></script>    
+        <meta name="google-signin-client_id" content="380641535728-ctfk6j8gptnm3e1htegncnmjkl6a3lkp.apps.googleusercontent.com">
+    </head>
+    <body>
+        <div id="mainMobileDiv">
+            <div class="mobileHeaderDiv">
+                <div class="mobileHeaderBg">
+                    <div class="logoDiv">
+                        <div class="logoCircle">
+                            <div class="logoTxt">LOGO</div>
+                        </div>
+                    </div>
+                    <div class="menuIcon sideNavPart">
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="scannerPage hideableElement">
+                <div class="mainDisplayDiv">
+                    <div id="cameraDiv" class="centralize hideableElement">
+                      <video id="camera"></video>
+                      <div class="qrBoxAndroid centralize"></div>
+                    </div>
+                    <div id="uploadDiv" class="centralize hideableElement">
+                      <img id="imageToUpload" src="static/uploadPhoto96.png" class="centralize" style="max-width: 100%; max-height: 100%;"/>
+                      <input id="file-input" type="file" name="name" style="display: none;" />
+                    </div>
+                    <div id="flip_android" class="flipCamera centralizeX">
+                        <a href="#" class="sideNavPart">
+                            <img src="static/camera_flip36w.png"/>
+                        </a>
+                    </div>
+                </div>
+                <div id="toScanBtn_android" class="toScanBtn btnDiv blackTxt selectedDiv toggle1 leftX">
+                    <div class="btnTxt centralize">Scan</div>
+                </div>
+                <div id="toUploadBtn_android" class="toUploadBtn btnDiv whiteTxt unSelectedDiv toggle2 rightX">
+                    <div class="btnTxt centralize">Upload</div>
+                </div>
+            </div>
+            <div class="scanResultPage hideableElement">
+                <div class="mainDisplayDiv">
+                    <div class="blackTxt centralize">Success!</div>
+                </div>
+                <div id="reScan_android" class="reScan btnLongDiv whiteTxt unSelectedDiv centralizeX">
+                    <div class="btnTxt centralize">Scan Again</div>
+                </div>
+            </div>
+            <div class="qrGeneratorPage hideableElement">
+                <div class="mainDisplayDiv">
+                    <div class="centralizeX">Generation Settings</div>
+                    <div class="centralize" style="width:100%;">
+                        <div id="sourceSelectPanel" style="display:block; bottom:0">
+                            <select id="sourceSelect">
+                                <option value="" disabled selected>Select size</option>
+                                <option value="1">1 x 1</option>
+                            </select>
+                        </div>
+                        <input type="number" id="quantity" name="quantity" max="100" step="0" placeholder="How many QR codes?">
+                    </div>
+                </div>
+                <div id="generate_android" class="generate btnLongDiv whiteTxt unSelectedDiv centralizeX">
+                    <div class="btnTxt centralize">Generate</div>
+                </div>
+            </div>
+            <div class="loginPage hideableElement">
+                <div class="mainDisplayDiv">
+                    <div class="centralizeX loginBtnDiv">
+                        <div id="fb-root"></div>
+                        <div id="fbLoginDiv">
+                            <div class="fb-login-button" data-size="medium" data-button-type="login_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false" data-width="200"></div>
+                        </div> 
+                        <div style="height:10px;"></div>
+                        <div class="g-signin2 centralizeX" data-onsuccess="onSignIn" style="height:28px;width:200px"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="mySidenav" class="sidenav sideNavPart">
+                <div id="sNaveHead" class="sideNavPart sideNavHeader"></div>
+                <div class="sideNavPart sideNavDivider"></div>
+                <a href="#" class="sideNavPart">About</a>
+            </div>
+
+            <div class="load-bar hideableElement">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+        <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+        <script type="text/javascript" src="static/constantsAndVariables.js"></script>
+        <script>
+            $(document).ready(function(){
+                $("#quantity").on('keyup', function () {
+                    var max = parseInt(this.max);
+                    this.value = this.value.replace(/[^0-9]*/g,"");
+                    if (parseInt(this.value) > max) {
+                        this.value = this.value.slice(0, -1); 
+                    }
+                });
+                $(".hideableElement").hide();
+                $("#cameraDiv").show();
+                initializeClickEventsWoShadow(".toUploadBtn");
+                initializeClickEventsWoShadow(".menuIcon");
+                initializeClickEventsWoShadow(".generate");
+                
+                $(".generate").click(function(){
+                    console.log("clicked");
+                });
+
+                $(".toUploadBtn").click(function(){
+                    $(".hideableElement").hide();
+                    $(".scannerPage").show();
+                    $("#uploadDiv").show();
+                    codeReader.reset();
+                    toggleScanUpload(".toUploadBtn");
+                    $("#file-input").click();
+                });
+
+                $(".toScanBtn").click(function(){
+                    $(".hideableElement").hide();
+                    $(".scannerPage").show();
+                    $("#cameraDiv").show();
+                    toggleScanUpload(".toScanBtn");
+                    $(EVENTMANAGER).trigger("startScan");
+                });
+
+                $(".reScan").click(function(){
+                    $(EVENTMANAGER).trigger("scanQr");
+                });
+
+                $(".flipCamera").click(function(){
+                    console.log("flip camera");
+                    deviceIdIndex++;
+                    if(deviceIdIndex >= videoDevices.length) {
+                        deviceIdIndex=0;
+                    }
+                    selectedDeviceId = videoDevices[deviceIdIndex].deviceId;
+                    $(EVENTMANAGER).trigger("scanQr");
+                });
+
+                var sideBarOpen = false;
+                $(".menuIcon").click(function(){
+                    console.log($("#mySidenav").height());
+                    console.log($("#sNaveHead").height());
+                    document.getElementById("mySidenav").style.width = "180px";
+                });
+                var container = (document.getElementsByClassName('sideNavPart'));
+                var containerArr = Array.prototype.slice.call(container);
+
+                $(document).click(function(event) {
+                    if (!containerArr.includes(event.target)) {    
+                        document.getElementById("mySidenav").style.width = "0";
+                    } 
+                });
+
+                function toggleScanUpload(divId){
+                    disableClick(divId);
+                    reenableClickWoShadow(TOGGLEMAPPAIR[divId]);
+                    $(divId).removeClass("unSelectedDiv");
+                    $(divId).removeClass("whiteTxt");
+                    $(divId).addClass("blackTxt");
+                    $(divId).addClass("selectedDiv");
+                    $(TOGGLEMAPPAIR[divId]).removeClass("selectedDiv");
+                    $(TOGGLEMAPPAIR[divId]).addClass("unSelectedDiv");
+                    $(TOGGLEMAPPAIR[divId]).removeClass("blackTxt");
+                    $(TOGGLEMAPPAIR[divId]).addClass("whiteTxt");
+                }
+                
+                var selectedDeviceId;
+                var videoDevices;
+                var deviceIdIndex=0;
+                const codeReader = new ZXing.BrowserQRCodeReader()
+                console.log('ZXing code reader initialized')
+                codeReader.listVideoInputDevices().then((videoInputDevices) => {
+                        // const sourceSelect = document.getElementById('sourceSelect')
+                        videoDevices = videoInputDevices;
+                        selectedDeviceId = videoInputDevices[deviceIdIndex].deviceId
+                        if (videoInputDevices.length >= 1) {
+                            
+                            // sourceSelect.onchange = () => {
+                            //     selectedDeviceId = sourceSelect.value;
+                            // };
+    
+                            // const sourceSelectPanel = document.getElementById('sourceSelectPanel')
+                            // sourceSelectPanel.style.display = 'block'
+                        }
+                    }).catch((err) => {
+                        console.error(err)
+                    });
+                    
+                    $(EVENTMANAGER).on("qrScanned", () => {
+                        // logic to change page
+                        codeReader.reset();
+                        initializeClickEventsWoShadow(".reScan");
+                        $(".scannerPage").hide();
+                        $(".scanResultPage").show();
+                    });
+
+                    $(EVENTMANAGER).on("scanQr", () => {
+                        $(".scannerPage").show();
+                        $(".scanResultPage").hide();
+                        $(EVENTMANAGER).trigger("startScan");
+                    });
+
+                    $(EVENTMANAGER).on("startScan", () => {
+                        codeReader.decodeFromInputVideoDevice(selectedDeviceId, 'camera').then((result) => {
+                            console.log(result)
+                            console.log(result.text);
+                            qrCodeValue=result;
+                            $(EVENTMANAGER).trigger("qrScanned");
+                        // document.getElementById('result').textContent = result.text
+                        }).catch((err) => {
+                            console.error(err)
+                            // document.getElementById('result').textContent = err
+                        });
+                        console.log(`Started camera with id `+selectedDeviceId)
+                    });
+
+                    $("#file-input").change(function(input){
+                        var reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            $('#imageToUpload').attr('src', e.target.result)
+                            var image = document.getElementById("imageToUpload");
+                            // codeReader.decodeFromImage(undefined, e.target.result)
+                            // .then(result => 
+                            //     console.log(result.text))
+                            // .catch(err => 
+                            //     console.log(err));
+                            codeReader
+                            .decodeFromImage(image)
+                            .then(result => 
+                            console.log(result.text))
+                            .catch(err => 
+                            console.error(err));
+                        };
+
+                        reader.readAsDataURL(input.target.files[0]);
+                    });
+                    setTimeout(function(){ 
+                        // $(EVENTMANAGER).trigger("scanQr");
+                        $(".loginPage").show();
+                        adjustToCenterX("#fbLoginDiv", ".loginBtnDiv");
+                     }, 100);
+            });
+        </script>
+    </body>
+</html>
